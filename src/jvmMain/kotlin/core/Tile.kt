@@ -1,9 +1,9 @@
 package core
 
-import android.graphics.Bitmap
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import org.jetbrains.skia.Bitmap
 
 /**
  * A [Tile] is defined by its coordinates in the "pyramid". But a [Tile] is sub-sampled when the

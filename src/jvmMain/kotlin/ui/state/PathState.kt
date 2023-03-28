@@ -1,9 +1,11 @@
 package ui.state
 
-import android.graphics.Paint
-import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ui.paths.PathData
@@ -95,7 +97,7 @@ internal class DrawablePathState(
     private val _paint = Paint()    // Create this only once
     val paint: Paint
         get() = _paint.apply {
-            color = this@DrawablePathState.color.toArgb()
+            color = this@DrawablePathState.color
         }
 
 

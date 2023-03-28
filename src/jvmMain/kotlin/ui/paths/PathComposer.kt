@@ -10,7 +10,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.withTransform
-import androidx.compose.ui.graphics.nativeCanvas
 import ui.state.DrawablePathState
 import ui.state.PathState
 import ui.state.ZoomPanRotateState
@@ -51,11 +50,11 @@ internal fun PathCanvas(
         }) {
             with(drawablePathState) {
                 val paint = paint.apply {
-                    strokeWidth = width.value / zoomPRState.scale
+                    width = (width.value / zoomPRState.scale).toDp()
                 }
                 if (visible) {
                     drawIntoCanvas {
-                        it.nativeCanvas.drawLines(pathData.data, offset, count, paint)
+//                        it.nativeCanvas.drawLines(pathData.data, offset, count, paint) TODO()
                     }
                 }
             }

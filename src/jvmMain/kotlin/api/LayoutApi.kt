@@ -2,7 +2,6 @@
 
 package api
 
-import android.annotation.SuppressLint
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.SpringSpec
@@ -24,9 +23,6 @@ import ui.layout.MinimumScaleMode
 import ui.state.MapState
 import ui.state.ZoomPanRotateState
 import utils.*
-import utils.rotate
-import utils.scaleAxis
-import utils.withRetry
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -108,7 +104,7 @@ var MapState.shouldLoopScale
  * left padding. Then, when you use the scrollTo methods, the map will take that into account, by
  * centering on the visible portion of the viewport.
  */
-@SuppressLint("ComposableNaming")
+//@SuppressLint("ComposableNaming")
 @Composable
 fun MapState.setVisibleAreaPadding(left: Dp = 0.dp, right: Dp = 0.dp, top: Dp = 0.dp, bottom: Dp = 0.dp) {
     with(LocalDensity.current) {

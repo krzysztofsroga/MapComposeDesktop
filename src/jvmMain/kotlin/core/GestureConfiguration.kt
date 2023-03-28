@@ -1,6 +1,5 @@
 package core
 
-import android.view.ViewConfiguration
 
 /**
  * Configuration of various gestures.

@@ -1,9 +1,9 @@
 package core
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.Paint
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Canvas
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.asComposeImageBitmap
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -11,6 +11,8 @@ import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.selects.select
+import org.jetbrains.skia.Bitmap
+import org.jetbrains.skia.Image
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
@@ -46,7 +48,7 @@ import java.util.concurrent.TimeUnit
  */
 internal class TileCollector(
     private val workerCount: Int,
-    private val bitmapConfig: Bitmap.Config,
+    private val bitmapConfig: Unit,
     private val tileSize: Int
 ) {
 
@@ -90,34 +92,34 @@ internal class TileCollector(
     ) = launch(dispatcher) {
 
         val layerIds = layers.map { it.id }
-        val bitmapLoadingOptionsForLayer = layerIds.associateWith {
-            BitmapFactory.Options().apply {
-                inPreferredConfig = bitmapConfig
-            }
-        }
-        val bitmapForLayer = layerIds.associateWith {
-            Bitmap.createBitmap(tileSize, tileSize, bitmapConfig)
-        }
-        val canvas = Canvas()
-        val paint = Paint(Paint.FILTER_BITMAP_FLAG)
+//        val bitmapLoadingOptionsForLayer = layerIds.associateWith {
+//            BitmapFactory.Options().apply {
+//                inPreferredConfig = bitmapConfig
+//            }
+//        }
+//        val bitmapForLayer = layerIds.associateWith {
+//            Bitmap.createBitmap(tileSize, tileSize, bitmapConfig)
+//        }
+//
+        val paint = Paint(/*Paint.FILTER_BITMAP_FLAG*/)
 
         suspend fun getBitmap(
             spec: TileSpec,
             layer: Layer,
             inBitmapForced: Bitmap? = null
         ): BitmapForLayer {
-            val bitmapLoadingOptions =
-                bitmapLoadingOptionsForLayer[layer.id] ?: return BitmapForLayer(null, layer)
-
-            bitmapLoadingOptions.inMutable = true
-            bitmapLoadingOptions.inBitmap = inBitmapForced ?: bitmapForLayer[layer.id]
-            bitmapLoadingOptions.inSampleSize = spec.subSample
+//            val bitmapLoadingOptions = bitmapLoadingOptionsForLayer[layer.id] ?: return BitmapForLayer(null, layer)
+//
+//            bitmapLoadingOptions.inMutable = true
+//            bitmapLoadingOptions.inBitmap = inBitmapForced ?: bitmapForLayer[layer.id]
+//            bitmapLoadingOptions.inSampleSize = spec.subSample
 
             val i = layer.tileStreamProvider.getTileStream(spec.row, spec.col, spec.zoom)
 
             return i.use {
                 val bitmap = runCatching {
-                    BitmapFactory.decodeStream(i, null, bitmapLoadingOptions)
+                    Bitmap.makeFromImage(Image.makeFromEncoded(it!!.readBytes()))
+//                    BitmapFactory.decodeStream(i, null, bitmapLoadingOptions)
                 }.getOrNull()
                 BitmapForLayer(bitmap, layer)
             }
@@ -142,12 +144,13 @@ internal class TileCollector(
                 null
             } ?: continue
 
-            canvas.setBitmap(resultBitmap)
+            val canvas = Canvas(resultBitmap.asComposeImageBitmap())
 
             for (result in bitmapForLayers.drop(1)) {
-                paint.alpha = (255f * result.layer.alpha).toInt()
+                paint.alpha = result.layer.alpha
                 if (result.bitmap == null) continue
-                canvas.drawBitmap(result.bitmap, 0f, 0f, paint)
+                canvas.drawImage(result.bitmap.asComposeImageBitmap(), Offset.Zero, paint)
+//                canvas.nativeCanvas.drawImage(Image.makeFromBitmap(result.bitmap), 0f, 0f)
             }
 
             val tile = Tile(

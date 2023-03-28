@@ -1,15 +1,15 @@
 package ui.state
 
-import android.graphics.Bitmap
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import core.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.*
-import core.*
+import org.jetbrains.skia.Bitmap
 import java.util.concurrent.Executors
 import kotlin.math.pow
 
@@ -60,14 +60,16 @@ internal class TileCanvasState(
         val bitmap = bitmapPool.get()
         emit(bitmap)
     }.flowOn(singleThreadDispatcher).map {
-        it ?: Bitmap.createBitmap(tileSize, tileSize, bitmapConfig)
+        it ?: Bitmap().apply {
+            allocN32Pixels(tileSize, tileSize, true)
+        }
     }
 
-    private val bitmapConfig = if (highFidelityColors) {
-        Bitmap.Config.ARGB_8888
-    } else {
-        Bitmap.Config.RGB_565
-    }
+//    private val bitmapConfig = if (highFidelityColors) {
+//        Bitmap.Config.ARGB_8888
+//    } else {
+//        Bitmap.Config.RGB_565
+//    }
 
     private val lastVisible: VisibleTiles?
         get() = visibleStateFlow.value?.visibleTiles
@@ -113,7 +115,7 @@ internal class TileCanvasState(
         }
 
         /* Launch the TileCollector */
-        tileCollector = TileCollector(workerCount.coerceAtLeast(1), bitmapConfig, tileSize)
+        tileCollector = TileCollector(workerCount.coerceAtLeast(1), Unit, tileSize)
         scope.launch {
             _layerFlow.collectLatest {
                 tileCollector.collectTiles(
@@ -422,9 +424,9 @@ internal class TileCanvasState(
      * After a [Tile] is no longer visible, recycle its Bitmap and Paint if possible, for later use.
      */
     private fun Tile.recycle() {
-        if (bitmap.isMutable) {
+//        if (bitmap.isMutable) {
             bitmapPool.put(bitmap)
-        }
+//        }
         alpha = 0f
     }
 
