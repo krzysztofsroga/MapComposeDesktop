@@ -1,3 +1,8 @@
 package utils
 
-fun dpToPx(dp: Float): Float = dp * 20 //TODO
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
+
+fun dpToPx(dp: Float): Float = with(density) { dp.dp.toPx() } //TODO
+
+var density = Density(1f)

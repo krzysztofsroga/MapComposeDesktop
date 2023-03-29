@@ -2,10 +2,10 @@ package ui.view
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.scale
@@ -28,7 +28,6 @@ internal fun TileCanvas(
     tilesToRender: List<Tile>,
     isFilteringBitmap: () -> Boolean,
 ) {
-    var dest by remember { mutableStateOf(Rect(Offset.Zero, Offset.Zero)) }
     val paint: Paint = remember {
         Paint().apply {
             isAntiAlias = false
@@ -59,9 +58,6 @@ internal fun TileCanvas(
                 val tileScaled = (tileSize / scaleForLevel).toInt()
                 val l = tile.col * tileScaled
                 val t = tile.row * tileScaled
-                val r = l + tileScaled
-                val b = t + tileScaled
-                dest = Rect(l.toFloat(), t.toFloat(), r.toFloat(), b.toFloat())
 
                 val colorFilter = colorFilterProvider?.getColorFilter(tile.row, tile.col, tile.zoom)
 
